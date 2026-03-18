@@ -35,27 +35,39 @@ function showMessage(data){
 
 let messagesDiv = document.getElementById("messages")
 
-// 🔥 DATE LABEL LOGIC
-if(data.date !== lastDate){
+// ✅ PERFECT DATE FIX
+let msgDate = new Date(data.date)
+let today = new Date()
+let yesterday = new Date()
+
+yesterday.setDate(today.getDate() - 1)
+
+// remove time
+msgDate.setHours(0,0,0,0)
+today.setHours(0,0,0,0)
+yesterday.setHours(0,0,0,0)
+
+let displayDate = ""
+
+if(msgDate.getTime() === today.getTime()){
+displayDate = "Today"
+}
+else if(msgDate.getTime() === yesterday.getTime()){
+displayDate = "Yesterday"
+}
+else{
+displayDate = msgDate.toLocaleDateString()
+}
+
+// show date label only once
+if(displayDate !== lastDate){
 
 let dateDiv = document.createElement("div")
 dateDiv.classList.add("dateLabel")
-
-let today = new Date().toLocaleDateString("en-IN")
-let yesterday = new Date(Date.now() - 86400000).toLocaleDateString("en-IN")
-
-if(data.date === today){
-dateDiv.innerText = "Today"
-}
-else if(data.date === yesterday){
-dateDiv.innerText = "Yesterday"
-}
-else{
-dateDiv.innerText = data.date
-}
+dateDiv.innerText = displayDate
 
 messagesDiv.appendChild(dateDiv)
-lastDate = data.date
+lastDate = displayDate
 }
 
 // message box
@@ -92,6 +104,7 @@ messagesDiv.appendChild(div)
 messagesDiv.scrollTop = messagesDiv.scrollHeight
 }
 
+// SEND MESSAGE
 function sendMessage(){
 
 let text=document.getElementById("message").value
@@ -106,6 +119,7 @@ msg:text
 document.getElementById("message").value=""
 }
 
+// IMAGE
 function openImage(){
 document.getElementById("imageInput").click()
 }
