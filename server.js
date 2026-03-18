@@ -50,9 +50,11 @@ let message = {
 name:data.name,
 msg:data.msg,
 image:data.image,
-time: now.toLocaleTimeString([],{
+time: now.toLocaleTimeString("en-IN",{
 hour:'2-digit',
-minute:'2-digit'
+minute:'2-digit',
+hour12:true,
+timeZone:"Asia/Kolkata"
 }),
 date: now.toISOString() // ✅ IMPORTANT FIX
 }
