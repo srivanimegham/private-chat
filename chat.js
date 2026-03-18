@@ -3,15 +3,11 @@ const socket = io()
 const params = new URLSearchParams(window.location.search)
 const room = params.get("room")
 
-// header names from room
 let names = room.split("-")
 document.getElementById("roomTitle").innerText =
 names[0] + " - " + names[1] + " Chat"
 
-// username
 let name = prompt("Enter your name")
-
-// password
 let password = prompt("Enter room password")
 
 socket.emit("joinRoom",{
@@ -25,7 +21,8 @@ alert("Wrong Password")
 location.reload()
 })
 
-// load old messages
+let lastDate = ""
+
 socket.on("oldMessages",(data)=>{
 data.forEach(showMessage)
 })
@@ -36,8 +33,33 @@ showMessage(data)
 
 function showMessage(data){
 
-let div = document.createElement("div")
+let messagesDiv = document.getElementById("messages")
 
+// 🔥 DATE LABEL LOGIC
+if(data.date !== lastDate){
+
+let dateDiv = document.createElement("div")
+dateDiv.classList.add("dateLabel")
+
+let today = new Date().toLocaleDateString("en-IN")
+let yesterday = new Date(Date.now() - 86400000).toLocaleDateString("en-IN")
+
+if(data.date === today){
+dateDiv.innerText = "Today"
+}
+else if(data.date === yesterday){
+dateDiv.innerText = "Yesterday"
+}
+else{
+dateDiv.innerText = data.date
+}
+
+messagesDiv.appendChild(dateDiv)
+lastDate = data.date
+}
+
+// message box
+let div = document.createElement("div")
 div.classList.add("msg")
 
 if(data.name===name){
@@ -49,14 +71,12 @@ div.classList.add("friendMsg")
 let content=""
 
 if(data.image){
-
 content = `
 <img src="${data.image}" class="chatImage"
 onclick="openFull('${data.image}')">
 <br>
 <a href="${data.image}" download>Download</a>
 `
-
 }else{
 content = data.msg
 }
@@ -67,29 +87,23 @@ ${content}
 <div class="time">${data.time}</div>
 `
 
-document.getElementById("messages").appendChild(div)
+messagesDiv.appendChild(div)
 
-document.getElementById("messages").scrollTop =
-document.getElementById("messages").scrollHeight
-
+messagesDiv.scrollTop = messagesDiv.scrollHeight
 }
 
 function sendMessage(){
 
 let text=document.getElementById("message").value
-
 if(text==="") return
 
 socket.emit("chatMessage",{
-
 room:room,
 name:name,
 msg:text
-
 })
 
 document.getElementById("message").value=""
-
 }
 
 function openImage(){
@@ -104,11 +118,9 @@ let reader=new FileReader()
 reader.onload=function(){
 
 socket.emit("chatMessage",{
-
 room:room,
 name:name,
 image:reader.result
-
 })
 
 }
@@ -118,8 +130,6 @@ reader.readAsDataURL(file)
 })
 
 function openFull(src){
-
 let w=window.open("")
 w.document.write(`<img src="${src}" style="width:100%">`)
-
 }
