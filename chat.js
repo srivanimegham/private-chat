@@ -19,12 +19,12 @@ location.reload()
 
 let lastDate = ""
 
-// OLD MESSAGES
+// OLD
 socket.on("oldMessages",(data)=>{
 data.forEach(showMessage)
 })
 
-// NEW MESSAGE
+// NEW
 socket.on("message",(data)=>{
 showMessage(data)
 })
@@ -42,17 +42,21 @@ document.getElementById("typing").innerText=""
 },2000)
 })
 
-// SEEN
+// ✅ SEEN (BLUE TICKS)
 socket.on("seen",()=>{
 let ticks = document.querySelectorAll(".tick")
-ticks.forEach(t=>t.innerText="✓✓")
+
+ticks.forEach(t=>{
+t.innerText = "✓✓"
+t.classList.add("seen")
+})
 })
 
 function showMessage(data){
 
 let messagesDiv = document.getElementById("messages")
 
-// DATE FIX
+// DATE
 let msgDate = new Date(data.date)
 let today = new Date()
 let yesterday = new Date()
@@ -83,7 +87,7 @@ messagesDiv.appendChild(dateDiv)
 lastDate = displayDate
 }
 
-// MESSAGE BOX
+// MSG BOX
 let div = document.createElement("div")
 div.classList.add("msg")
 
@@ -116,13 +120,14 @@ messagesDiv.appendChild(div)
 messagesDiv.scrollTop = messagesDiv.scrollHeight
 }
 
-// SEND MESSAGE
+// SEND
 function sendMessage(){
 let text=document.getElementById("message").value
 if(text==="") return
 
 socket.emit("chatMessage",{room,name,msg:text})
 
+// trigger seen
 setTimeout(()=>{
 socket.emit("seen",room)
 },1000)
