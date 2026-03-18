@@ -1,21 +1,26 @@
 const express = require("express")
 const http = require("http")
 const { Server } = require("socket.io")
+const path = require("path")
 
 const app = express()
 const server = http.createServer(app)
 const io = new Server(server)
 
+// ✅ STATIC FILES (VERY IMPORTANT)
 app.use(express.static(__dirname))
 
+// rooms data
 let rooms = {}
 
 io.on("connection",(socket)=>{
 
+// JOIN ROOM
 socket.on("joinRoom",(data)=>{
 
 let {room,name,password} = data
 
+// create room first time
 if(!rooms[room]){
 rooms[room] = {
 password: password,
@@ -23,6 +28,7 @@ messages:[]
 }
 }
 
+// password check
 if(rooms[room].password !== password){
 socket.emit("wrongPassword")
 return
@@ -30,10 +36,12 @@ return
 
 socket.join(room)
 
+// send old messages
 socket.emit("oldMessages",rooms[room].messages)
 
 })
 
+// SEND MESSAGE
 socket.on("chatMessage",(data)=>{
 
 let now = new Date()
@@ -42,27 +50,24 @@ let message = {
 name:data.name,
 msg:data.msg,
 image:data.image,
-time: now.toLocaleTimeString("en-IN", {
-timeZone: "Asia/Kolkata",
-hour: "2-digit",
-minute: "2-digit"
+time: now.toLocaleTimeString([],{
+hour:'2-digit',
+minute:'2-digit'
 }),
-date: now.toLocaleDateString("en-IN", {
-timeZone: "Asia/Kolkata",
-year: "numeric",
-month: "short",
-day: "numeric"
-})
+date: now.toISOString() // ✅ IMPORTANT FIX
 }
 
+// save message
 rooms[data.room].messages.push(message)
 
+// send to all users in room
 io.to(data.room).emit("message",message)
 
 })
 
 })
 
+// PORT (RENDER FIX)
 const PORT = process.env.PORT || 3000
 
 server.listen(PORT,()=>{
