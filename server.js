@@ -1,7 +1,6 @@
 const express = require("express")
 const http = require("http")
 const { Server } = require("socket.io")
-const path = require("path")
 
 const app = express()
 const server = http.createServer(app)
@@ -17,48 +16,47 @@ socket.on("joinRoom",(data)=>{
 
 let {room,name,password} = data
 
-// room create
 if(!rooms[room]){
-
 rooms[room] = {
 password: password,
 messages:[]
 }
-
 }
 
-// password check
 if(rooms[room].password !== password){
-
 socket.emit("wrongPassword")
 return
-
 }
 
 socket.join(room)
 
-// old messages send
 socket.emit("oldMessages",rooms[room].messages)
 
 })
 
 socket.on("chatMessage",(data)=>{
 
+let now = new Date()
+
 let message = {
 name:data.name,
 msg:data.msg,
 image:data.image,
-time: new Date().toLocaleTimeString("en-IN", {
-  timeZone: "Asia/Kolkata",
-  hour: "2-digit",
-  minute: "2-digit"
+time: now.toLocaleTimeString("en-IN", {
+timeZone: "Asia/Kolkata",
+hour: "2-digit",
+minute: "2-digit"
+}),
+date: now.toLocaleDateString("en-IN", {
+timeZone: "Asia/Kolkata",
+year: "numeric",
+month: "short",
+day: "numeric"
 })
 }
 
-// save message
 rooms[data.room].messages.push(message)
 
-// send to room
 io.to(data.room).emit("message",message)
 
 })
