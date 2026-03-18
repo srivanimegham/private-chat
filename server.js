@@ -48,9 +48,10 @@ let message = {
 name:data.name,
 msg:data.msg,
 image:data.image,
-time:new Date().toLocaleTimeString([],{
-hour:'2-digit',
-minute:'2-digit'
+time: new Date().toLocaleTimeString("en-IN", {
+  timeZone: "Asia/Kolkata",
+  hour: "2-digit",
+  minute: "2-digit"
 })
 }
 
